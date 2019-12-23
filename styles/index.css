@@ -53,7 +53,7 @@ h2 {
 }
 
 .task-list li {
-  margin: 10px auto;
+  padding: 5px 0 5px 0;
 }
 
 .task-list li:nth-child(2n) {
