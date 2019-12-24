@@ -1,8 +1,6 @@
 
 var storage = window.localStorage;
 
-var count = 0;
-
 var totalTaskCount;
 var validTaskCount;
 var activeTaskCount;
@@ -11,6 +9,30 @@ var taskListEl = document.getElementsByClassName('task-list')[0];
 
 initializeCount();
 displayAllTasks();
+
+function onInterfaceClick(event) {
+  var clickId = event.target.getAttribute('id')
+    || event.target.parentElement.getAttribute('id');
+  switch (clickId) {
+    case 'add':
+      addTask();
+      break;
+    case null:
+      break;
+    default:
+      onClickCheckboxHandle(clickId);
+  }
+  console.log(event.target);
+  console.log(clickId);
+}
+
+function onKeyDown(event) {
+  if ('Enter' === event.key) {
+    event.preventDefault();
+    addTask();
+  }
+}
+
 function initializeCount() {
   retriveCountFromStorage();
   if (null === totalTaskCount) {
@@ -23,10 +45,21 @@ function initializeCount() {
   }
 }
 
-function newTaskCount() {
-  totalTaskCount++;
-  validTaskCount++;
-  activeTaskCount++;
+function displayAllTasks() {
+  for (var index = 1; index <= totalTaskCount; index++) {
+    var taskContent;
+    var activeId = addActiveToTaskId(index);
+    var completeId = addCompleteToTaskId(index);
+    if (taskContent = storage.getItem(activeId)) {
+      addTaskToPage(activeId, taskContent);
+    }
+    if (taskContent = storage.getItem(completeId)){
+      addTaskToPage(completeId, taskContent);
+      var taskEl = document.getElementById(completeId);
+      taskEl.style.textDecoration ='line-through';
+      taskEl.firstChild.setAttribute('checked', 'checked');
+    }
+  }
 }
 
 function retriveCountFromStorage() {
@@ -43,37 +76,21 @@ function writeCountToStorage() {
   storage.setItem('completed-task-count', completedTaskCount);
 }
 
-function displayAllTasks() {
-  for (var index = 1; index <= totalTaskCount; index++) {
-    var taskContent = storage.getItem(index);
-    addTaskToPage(taskContent);
-  }
-}
-
-function onClickAdd() {
-  addTask();
-}
-
-function onKeyDown(event) {
-  if ('Enter' === event.key) {
-    event.preventDefault();
-    addTask();
-  }
-}
-
-var taskAdded = document.getElementsByClassName('input-textbox')[0];
 function addTask() {
+  var taskAdded = document.getElementsByClassName('input-textbox')[0];
   var taskText;
   if (taskText = taskAdded.value) {
+    var newTaskId;
     taskAdded.value = null;
     newTaskCount();
+    newTaskId = addActiveToTaskId(totalTaskCount);
     writeCountToStorage();
-    storage.setItem(totalTaskCount, taskText);
-    addTaskToPage(taskText);
+    storage.setItem(newTaskId, taskText);
+    addTaskToPage(newTaskId, taskText);
   }
 }
 
-function addTaskToPage(content) {
+function addTaskToPage(taskId, content) {
   var newTask = document.createElement('li');
   var newCheckBox = document.createElement('input');
   var newTaskTitle = document.createElement('span');
@@ -82,6 +99,66 @@ function addTaskToPage(content) {
   newTaskTitle.textContent = content;
   newTask.appendChild(newCheckBox);
   newTask.appendChild(newTaskTitle);
+  newTask.setAttribute('id', taskId);
   taskListEl.appendChild(newTask);
 }
 
+function newTaskCount() {
+  totalTaskCount++;
+  validTaskCount++;
+  activeTaskCount++;
+}
+
+function onClickCheckboxHandle(oldTaskId) {
+  newTaskId = toggleTaskId(oldTaskId);
+  toggleTaskInStorage(oldTaskId, newTaskId);
+  toggleTaskDisplayed(oldTaskId, newTaskId);
+}
+
+function toggleTaskId(taskId){
+  var taskNum = extractNumFromTaskId(taskId);
+  var taskStatus = extractStatusFromTaskId(taskId);
+  if ('active' === taskStatus) {
+    return addCompleteToTaskId(taskNum);
+  }
+  else {
+    return addActiveToTaskId(taskNum);
+  }
+}
+
+function toggleTaskInStorage(oldId, newId) {
+  storage.setItem(newId, storage.getItem(oldId));
+  storage.removeItem(oldId);
+}
+
+function toggleTaskDisplayed(oldTaskId, newTaskId) {
+  var clickedTask = document.getElementById(oldTaskId);
+  var status = extractStatusFromTaskId(oldTaskId);
+  clickedTask.setAttribute('id', newTaskId);
+  if ('active' === status) {
+    clickedTask.style.textDecoration = 'line-through';
+  }
+  else {
+    clickedTask.style.textDecoration = 'none';
+  }
+}
+
+
+
+
+
+function extractNumFromTaskId(idStr) {
+  return idStr.split(' ')[0];
+}
+
+function extractStatusFromTaskId(idStr) {
+  return idStr.split(' ')[1];
+}
+
+function addActiveToTaskId(idStr) {
+  return idStr + ' ' + 'active'
+}
+
+function addCompleteToTaskId(idStr) {
+  return idStr + ' ' + 'complete'
+}
