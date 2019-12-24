@@ -97,7 +97,9 @@ function addTask() {
     newTaskId = addActiveToTaskId(totalTaskCount);
     writeCountToStorage();
     storage.setItem(newTaskId, taskText);
-    addTaskToPage(newTaskId, taskText);
+    if (!('complete' === currentFilter)) {
+      addTaskToPage(newTaskId, taskText);
+    }
   }
 }
 
