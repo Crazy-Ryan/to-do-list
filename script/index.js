@@ -57,6 +57,7 @@ function displayAllTasks() {
       addTaskToPage(completeId, taskContent);
       var taskEl = document.getElementById(completeId);
       taskEl.style.textDecoration ='line-through';
+      taskEl.style.color = 'gray';
       taskEl.firstChild.setAttribute('checked', 'checked');
     }
   }
@@ -137,15 +138,13 @@ function toggleTaskDisplayed(oldTaskId, newTaskId) {
   clickedTask.setAttribute('id', newTaskId);
   if ('active' === status) {
     clickedTask.style.textDecoration = 'line-through';
+    clickedTask.style.color = 'gray';
   }
   else {
     clickedTask.style.textDecoration = 'none';
+    clickedTask.style.color = 'black';
   }
 }
-
-
-
-
 
 function extractNumFromTaskId(idStr) {
   return idStr.split(' ')[0];
