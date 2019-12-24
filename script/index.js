@@ -6,9 +6,10 @@ var validTaskCount;
 var activeTaskCount;
 var completedTaskCount;
 var taskListEl = document.getElementsByClassName('task-list')[0];
+var currentFilter = 'all';
 
 initializeCount();
-displayAllTasks();
+displayTasks('all');
 
 function onInterfaceClick(event) {
   var clickId = event.target.getAttribute('id')
@@ -17,12 +18,17 @@ function onInterfaceClick(event) {
     case 'add':
       addTask();
       break;
+    case 'all':
+    case 'active':
+    case 'complete':
+      onClickFilter(clickId);
+      break;
     case null:
       break;
     default:
       onClickCheckboxHandle(clickId);
   }
-  console.log(event.target);
+  // console.log(event.target);
   console.log(clickId);
 }
 
@@ -45,20 +51,24 @@ function initializeCount() {
   }
 }
 
-function displayAllTasks() {
+function displayTasks(filter) {
   for (var index = 1; index <= totalTaskCount; index++) {
     var taskContent;
     var activeId = addActiveToTaskId(index);
     var completeId = addCompleteToTaskId(index);
-    if (taskContent = storage.getItem(activeId)) {
-      addTaskToPage(activeId, taskContent);
+    if (('all' === filter) || ('active' === filter)) {
+      if (taskContent = storage.getItem(activeId)) {
+        addTaskToPage(activeId, taskContent);
+      }
     }
-    if (taskContent = storage.getItem(completeId)){
-      addTaskToPage(completeId, taskContent);
-      var taskEl = document.getElementById(completeId);
-      taskEl.style.textDecoration ='line-through';
-      taskEl.style.color = 'gray';
-      taskEl.firstChild.setAttribute('checked', 'checked');
+    if (('all' === filter) || ('complete' === filter)) {
+      if (taskContent = storage.getItem(completeId)) {
+        addTaskToPage(completeId, taskContent);
+        var taskEl = document.getElementById(completeId);
+        taskEl.style.textDecoration = 'line-through';
+        taskEl.style.color = 'gray';
+        taskEl.firstChild.setAttribute('checked', 'checked');
+      }
     }
   }
 }
@@ -104,10 +114,37 @@ function addTaskToPage(taskId, content) {
   taskListEl.appendChild(newTask);
 }
 
+function removeAllTasksFromPage() {
+  while (taskListEl.firstChild) {
+    taskListEl.removeChild(taskListEl.firstChild);
+  }
+}
+
 function newTaskCount() {
   totalTaskCount++;
   validTaskCount++;
   activeTaskCount++;
+}
+
+function onClickFilter(newFilter) {
+  if (currentFilter === newFilter) {
+    return;
+  }
+  else {
+    currentFilter = newFilter;
+    removeAllTasksFromPage();
+    switch (newFilter) {
+      case 'all':
+        displayTasks('all');
+        break;
+      case 'active':
+        displayTasks('active');
+        break;
+      case 'complete':
+        displayTasks('complete');
+        break;
+    }
+  }
 }
 
 function onClickCheckboxHandle(oldTaskId) {
@@ -116,7 +153,7 @@ function onClickCheckboxHandle(oldTaskId) {
   toggleTaskDisplayed(oldTaskId, newTaskId);
 }
 
-function toggleTaskId(taskId){
+function toggleTaskId(taskId) {
   var taskNum = extractNumFromTaskId(taskId);
   var taskStatus = extractStatusFromTaskId(taskId);
   if ('active' === taskStatus) {
