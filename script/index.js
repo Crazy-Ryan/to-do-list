@@ -6,10 +6,12 @@ var validTaskCount;
 var activeTaskCount;
 var completedTaskCount;
 var taskListEl = document.getElementsByClassName('task-list')[0];
+var deleteIcon;
 var currentFilter = 'all';
 
 initializeCount();
 displayTasks('all');
+initializeDeleteIcon();
 
 function onInterfaceClick(event) {
   var clickId = event.target.getAttribute('id')
@@ -23,12 +25,14 @@ function onInterfaceClick(event) {
     case 'complete':
       onClickFilter(clickId);
       break;
+    case 'delete-icon':
+      deleteTask(event.target);
+      break;
     case null:
       break;
     default:
       onClickCheckboxHandle(clickId);
   }
-  // console.log(event.target);
   console.log(clickId);
 }
 
@@ -67,7 +71,7 @@ function displayTasks(filter) {
         var taskEl = document.getElementById(completeId);
         taskEl.style.textDecoration = 'line-through';
         taskEl.style.color = 'gray';
-        taskEl.firstChild.setAttribute('checked', 'checked');
+        taskEl.firstChild.checked = true;
       }
     }
   }
@@ -178,10 +182,12 @@ function toggleTaskDisplayed(oldTaskId, newTaskId) {
   if ('active' === status) {
     clickedTask.style.textDecoration = 'line-through';
     clickedTask.style.color = 'gray';
+    clickedTask.firstChild.checked = true;
   }
   else {
     clickedTask.style.textDecoration = 'none';
     clickedTask.style.color = 'black';
+    clickedTask.firstChild.checked = false;
   }
 }
 
@@ -199,4 +205,30 @@ function addActiveToTaskId(idStr) {
 
 function addCompleteToTaskId(idStr) {
   return idStr + ' ' + 'complete'
+}
+
+function initializeDeleteIcon() {
+  deleteIcon = document.createElement('div');
+  deleteIcon.setAttribute('class', 'delete-icon');
+  deleteIcon.setAttribute('id', 'delete-icon');
+  deleteIcon.textContent = '×';
+}
+
+function onMouseoverTask(event) {
+  if (deleteIcon !== event.target) {
+    event.target.appendChild(deleteIcon);
+    // console.log(event);
+  }
+}
+
+function onMouseleaveTask(event) {
+  if (deleteIcon.parentElement) {
+    deleteIcon.parentElement.removeChild(deleteIcon);
+  }
+}
+
+function deleteTask(target) {
+  var taskId = target.parentElement.getAttribute('id');
+  target.parentElement.parentElement.removeChild(target.parentElement);
+  storage.removeItem(taskId);
 }

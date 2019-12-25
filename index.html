@@ -6,14 +6,16 @@
   <link rel="stylesheet" type="text/css" media="screen" href="./styles/index.css" />
 </head>
 <body>
-  <div class="interface" onclick="onInterfaceClick(event)">
+  <div class="interface" onclick="onInterfaceClick(event)" >
     <h1>To Do List</h1>
     <h2><i>Simple Todo List with adding and filter by diff status.</i></h2>
     <form>
       <input type="text" class="input-textbox"  onkeydown="onKeyDown(event)"/>
       <button type="button" class="add" id="add">Add</button>
-    <ol class="task-list">
-      <!-- <li><input type="checkbox"/><span>任务一(用于初始化列表)</span></li> -->
+    <ol class="task-list" onmouseover="onMouseoverTask(event)" onmouseleave="onMouseleaveTask(event)">
+      <!-- <li onmouseover="onMouseoverTask(event)"><input type="checkbox"/><span>任务一(用于初始化列表)</span><div class="delete-icon">×</div></li> -->
+      <!-- <li onmouseover="onMouseoverTask(event)"><input type="checkbox"/><span>任务一(用于初始化列表)</span></li> -->
+      <!-- <li><input type="checkbox"/><span>任务二(用于初始化列表)</span><div class="delete-icon">×</div></li> -->
     </ol>
     </form>
     <div class="filter">

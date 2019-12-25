@@ -54,9 +54,17 @@ h2 {
 }
 
 .task-list li {
+  position: relative;
   padding: 5px 0 5px 0;
-  /* text-decoration: line-through; */
 }
+
+/* .task-list li:hover + .delete-icon {
+.task-list li:hover {
+  /* display: inline-block; */
+
+/* border: 1px solid blue; */
+
+/* } */
 
 .task-list li:nth-child(2n) {
   background-color: #f3ebeb;
@@ -74,7 +82,7 @@ h2 {
   color: #fc999c;
 }
 
-.filter div:hover{
+.filter div:hover {
   border-color: #cccccc;
 }
 
@@ -85,6 +93,22 @@ h2 {
   margin: 10px auto;
 }
 
-button{
+button {
   cursor: pointer;
+}
+
+.delete-icon {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  height: 100%;
+  writing-mode: vertical-lr;
+  text-align: center;
+  font-size: 1rem;
+  color: gray;
+}
+
+.delete-icon:hover {
+  cursor: pointer;
+  color: black;
 }
