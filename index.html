@@ -1,29 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
   <meta charset="UTF-8">
   <title>To do list</title>
   <link rel="stylesheet" type="text/css" media="screen" href="./styles/index.css" />
 </head>
-<body>
-  <div class="interface" onclick="onInterfaceClick(event)" >
-    <h1>To Do List</h1>
-    <h2><i>Simple Todo List with adding and filter by diff status.</i></h2>
+
+<body onclick="onInterfaceClick(event)">
+
+  <div class="interface">
     <form>
-      <input type="text" class="input-textbox"  onkeydown="onKeyDown(event)"/>
+      <h1>To Do List</h1>
+      <h2><i>Simple Todo List with adding and filter by diff status.</i></h2>
+      <input type="text" class="input-textbox" onkeydown="onKeyDown(event)" />
       <button type="button" class="add" id="add">Add</button>
-    <ol class="task-list" onmouseover="onMouseoverTask(event)" onmouseleave="onMouseleaveTask(event)">
-      <!-- <li onmouseover="onMouseoverTask(event)"><input type="checkbox"/><span>任务一(用于初始化列表)</span><div class="delete-icon">×</div></li> -->
-      <!-- <li onmouseover="onMouseoverTask(event)"><input type="checkbox"/><span>任务一(用于初始化列表)</span></li> -->
-      <!-- <li><input type="checkbox"/><span>任务二(用于初始化列表)</span><div class="delete-icon">×</div></li> -->
-    </ol>
+      <ol class="task-list" onmouseover="onMouseoverTask(event)" onmouseleave="onMouseleaveTask()"></ol>
+      <div class="filter">
+        <div id="all">ALL</div>
+        <div id="active">Active</div>
+        <div id="complete">Complete</div>
+      </div>
     </form>
-    <div class="filter">
-      <div id="all">ALL</div>
-      <div id="active">Active</div>
-      <div id="complete">Complete</div>
+  </div>
+  <div class="delete-popup">
+    <div class="delete-dialog">
+      <h3>Are you sure you want to delete this task?</h3>
+      <div class="confirmation-dialog">
+        <div id="delete-btn">DELETE</div>
+        <div id="cancel">Cancel</div>
+      </div>
     </div>
   </div>
+
 </body>
 <script src="script/index.js"></script>
+
 </html>

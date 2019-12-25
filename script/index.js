@@ -1,13 +1,10 @@
-
 var storage = window.localStorage;
-
 var totalTaskCount;
-var validTaskCount;
-var activeTaskCount;
-var completedTaskCount;
-var taskListEl = document.getElementsByClassName('task-list')[0];
-var deleteIcon;
 var currentFilter = 'all';
+var deleteIcon;
+var taskToDeleteId;
+var deletePopupEl = document.getElementsByClassName('delete-popup')[0];
+var taskListEl = document.getElementsByClassName('task-list')[0];
 
 initializeCount();
 displayTasks('all');
@@ -26,14 +23,19 @@ function onInterfaceClick(event) {
       onClickFilter(clickId);
       break;
     case 'delete-icon':
-      deleteTask(event.target);
+      onClickDeleteIcon(event.target);
+      break;
+    case 'delete-btn':
+      onClickDeleteBtn();
+      break;
+    case 'cancel':
+      onClickCancel();
       break;
     case null:
       break;
     default:
-      onClickCheckboxHandle(clickId);
+      onClickCheckbox(clickId);
   }
-  console.log(clickId);
 }
 
 function onKeyDown(event) {
@@ -43,15 +45,51 @@ function onKeyDown(event) {
   }
 }
 
+function onMouseoverTask(event) {
+  if (deleteIcon !== event.target) {
+    event.target.appendChild(deleteIcon);
+  }
+}
+
+function onMouseleaveTask() {
+  if (deleteIcon.parentElement) {
+    deleteIcon.parentElement.removeChild(deleteIcon);
+  }
+}
+
 function initializeCount() {
-  retriveCountFromStorage();
+  totalTaskCount = storage.getItem('total-task-count');
   if (null === totalTaskCount) {
     storage.clear();
     totalTaskCount = 0;
-    validTaskCount = 0;
-    activeTaskCount = 0;
-    completedTaskCount = 0;
-    writeCountToStorage();
+    storage.setItem('total-task-count', totalTaskCount);
+  }
+}
+
+function addTask() {
+  var taskAdded = document.getElementsByClassName('input-textbox')[0];
+  var taskText = taskAdded.value;
+  if (taskText) {
+    var newTaskId;
+    taskAdded.value = null;
+    totalTaskCount++;
+    newTaskId = addActiveToTaskId(totalTaskCount);
+    storage.setItem('total-task-count', totalTaskCount);
+    storage.setItem(newTaskId, taskText);
+    if (!('complete' === currentFilter)) {
+      addTaskToPage(newTaskId, taskText);
+    }
+  }
+}
+
+function onClickFilter(newFilter) {
+  setHighlightFilterBorder(newFilter);
+  if (currentFilter === newFilter) {
+    return;
+  } else {
+    currentFilter = newFilter;
+    removeAllTasksFromPage();
+    displayTasks(newFilter);
   }
 }
 
@@ -68,43 +106,48 @@ function displayTasks(filter) {
     if (('all' === filter) || ('complete' === filter)) {
       if (taskContent = storage.getItem(completeId)) {
         addTaskToPage(completeId, taskContent);
-        var taskEl = document.getElementById(completeId);
-        taskEl.style.textDecoration = 'line-through';
-        taskEl.style.color = 'gray';
-        taskEl.firstChild.checked = true;
+        setCompleteTaskStyle(completeId);
       }
     }
   }
 }
 
-function retriveCountFromStorage() {
-  totalTaskCount = storage.getItem('total-task-count');
-  validTaskCount = storage.getItem('valid-task-count');
-  activeTaskCount = storage.getItem('active-task-count');
-  completedTaskCount = storage.getItem('completed-task-count');
+function setHighlightFilterBorder(filter) {
+  document.getElementById('all').style.borderColor = 'transparent';
+  document.getElementById('active').style.borderColor = 'transparent';
+  document.getElementById('complete').style.borderColor = 'transparent';
+  document.getElementById(filter).style.borderColor = '#cccccc';
 }
 
-function writeCountToStorage() {
-  storage.setItem('total-task-count', totalTaskCount);
-  storage.setItem('valid-task-count', validTaskCount);
-  storage.setItem('active-task-count', activeTaskCount);
-  storage.setItem('completed-task-count', completedTaskCount);
+function onClickCheckbox(oldTaskId) {
+  var newTaskId = toggleTaskId(oldTaskId);
+  toggleTaskInStorage(oldTaskId, newTaskId);
+  toggleTaskDisplayed(oldTaskId, newTaskId);
 }
 
-function addTask() {
-  var taskAdded = document.getElementsByClassName('input-textbox')[0];
-  var taskText;
-  if (taskText = taskAdded.value) {
-    var newTaskId;
-    taskAdded.value = null;
-    newTaskCount();
-    newTaskId = addActiveToTaskId(totalTaskCount);
-    writeCountToStorage();
-    storage.setItem(newTaskId, taskText);
-    if (!('complete' === currentFilter)) {
-      addTaskToPage(newTaskId, taskText);
-    }
-  }
+function onClickDeleteIcon(target) {
+  deletePopupEl.style.display = "flex";
+  taskToDeleteId = target.parentElement.getAttribute('id');
+}
+
+function onClickDeleteBtn() {
+  deletePopupEl.style.display = "none";
+  deleteTask(taskToDeleteId);
+}
+function onClickCancel() {
+  deletePopupEl.style.display = "none";
+}
+
+function deleteTask(taskId) {
+  taskListEl.removeChild(document.getElementById(taskId));
+  storage.removeItem(taskId);
+}
+
+function initializeDeleteIcon() {
+  deleteIcon = document.createElement('div');
+  deleteIcon.setAttribute('class', 'delete-icon');
+  deleteIcon.setAttribute('id', 'delete-icon');
+  deleteIcon.textContent = '×';
 }
 
 function addTaskToPage(taskId, content) {
@@ -120,43 +163,24 @@ function addTaskToPage(taskId, content) {
   taskListEl.appendChild(newTask);
 }
 
+function setCompleteTaskStyle(taskId) {
+  var taskEl = document.getElementById(taskId);
+  taskEl.style.textDecoration = 'line-through';
+  taskEl.style.color = 'gray';
+  taskEl.firstChild.checked = true;
+}
+
+function setActiveTaskStyle(taskId) {
+  var taskEl = document.getElementById(taskId);
+  taskEl.style.textDecoration = 'none';
+  taskEl.style.color = 'black';
+  taskEl.firstChild.checked = false;
+}
+
 function removeAllTasksFromPage() {
   while (taskListEl.firstChild) {
     taskListEl.removeChild(taskListEl.firstChild);
   }
-}
-
-function newTaskCount() {
-  totalTaskCount++;
-  validTaskCount++;
-  activeTaskCount++;
-}
-
-function onClickFilter(newFilter) {
-  if (currentFilter === newFilter) {
-    return;
-  }
-  else {
-    currentFilter = newFilter;
-    removeAllTasksFromPage();
-    switch (newFilter) {
-      case 'all':
-        displayTasks('all');
-        break;
-      case 'active':
-        displayTasks('active');
-        break;
-      case 'complete':
-        displayTasks('complete');
-        break;
-    }
-  }
-}
-
-function onClickCheckboxHandle(oldTaskId) {
-  newTaskId = toggleTaskId(oldTaskId);
-  toggleTaskInStorage(oldTaskId, newTaskId);
-  toggleTaskDisplayed(oldTaskId, newTaskId);
 }
 
 function toggleTaskId(taskId) {
@@ -175,19 +199,20 @@ function toggleTaskInStorage(oldId, newId) {
   storage.removeItem(oldId);
 }
 
-function toggleTaskDisplayed(oldTaskId, newTaskId) {
-  var clickedTask = document.getElementById(oldTaskId);
-  var status = extractStatusFromTaskId(oldTaskId);
-  clickedTask.setAttribute('id', newTaskId);
-  if ('active' === status) {
-    clickedTask.style.textDecoration = 'line-through';
-    clickedTask.style.color = 'gray';
-    clickedTask.firstChild.checked = true;
+function toggleTaskDisplayed(oldId, newId) {
+  var clickedTask = document.getElementById(oldId);
+  if ('all' === currentFilter) {
+    clickedTask.setAttribute('id', newId);
+    var status = extractStatusFromTaskId(oldId);
+    if ('active' === status) {
+      setCompleteTaskStyle(newId);
+    }
+    else {
+      setActiveTaskStyle(newId);
+    }
   }
   else {
-    clickedTask.style.textDecoration = 'none';
-    clickedTask.style.color = 'black';
-    clickedTask.firstChild.checked = false;
+    taskListEl.removeChild(clickedTask);
   }
 }
 
@@ -200,35 +225,9 @@ function extractStatusFromTaskId(idStr) {
 }
 
 function addActiveToTaskId(idStr) {
-  return idStr + ' ' + 'active'
+  return idStr + ' ' + 'active';
 }
 
 function addCompleteToTaskId(idStr) {
-  return idStr + ' ' + 'complete'
-}
-
-function initializeDeleteIcon() {
-  deleteIcon = document.createElement('div');
-  deleteIcon.setAttribute('class', 'delete-icon');
-  deleteIcon.setAttribute('id', 'delete-icon');
-  deleteIcon.textContent = '×';
-}
-
-function onMouseoverTask(event) {
-  if (deleteIcon !== event.target) {
-    event.target.appendChild(deleteIcon);
-    // console.log(event);
-  }
-}
-
-function onMouseleaveTask(event) {
-  if (deleteIcon.parentElement) {
-    deleteIcon.parentElement.removeChild(deleteIcon);
-  }
-}
-
-function deleteTask(target) {
-  var taskId = target.parentElement.getAttribute('id');
-  target.parentElement.parentElement.removeChild(target.parentElement);
-  storage.removeItem(taskId);
+  return idStr + ' ' + 'complete';
 }
