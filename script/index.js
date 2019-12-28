@@ -1,13 +1,16 @@
 var storage = window.localStorage;
 var totalTaskCount;
-var currentFilter = 'all';
 var deleteIcon;
 var taskToDeleteId;
 var deletePopupEl = document.getElementsByClassName('delete-popup')[0];
 var taskListEl = document.getElementsByClassName('task-list')[0];
+const all = 'all';
+const active = 'active';
+const complete = 'complete';
+var currentFilter = all;
 
 initializeCount();
-displayTasks('all');
+displayTasks(all);
 initializeDeleteIcon();
 
 function onInterfaceClick(event) {
@@ -76,7 +79,7 @@ function addTask() {
     newTaskId = addActiveToTaskId(totalTaskCount);
     storage.setItem('total-task-count', totalTaskCount);
     storage.setItem(newTaskId, taskText);
-    if (!('complete' === currentFilter)) {
+    if (!(complete === currentFilter)) {
       addTaskToPage(newTaskId, taskText);
     }
   }
@@ -98,12 +101,12 @@ function displayTasks(filter) {
     var taskContent;
     var activeId = addActiveToTaskId(index);
     var completeId = addCompleteToTaskId(index);
-    if (('all' === filter) || ('active' === filter)) {
+    if ((all === filter) || (active === filter)) {
       if (taskContent = storage.getItem(activeId)) {
         addTaskToPage(activeId, taskContent);
       }
     }
-    if (('all' === filter) || ('complete' === filter)) {
+    if ((all === filter) || (complete === filter)) {
       if (taskContent = storage.getItem(completeId)) {
         addTaskToPage(completeId, taskContent);
         setCompleteTaskStyle(completeId);
@@ -113,9 +116,9 @@ function displayTasks(filter) {
 }
 
 function setHighlightFilterBorder(filter) {
-  document.getElementById('all').style.borderColor = 'transparent';
-  document.getElementById('active').style.borderColor = 'transparent';
-  document.getElementById('complete').style.borderColor = 'transparent';
+  document.getElementById(all).style.borderColor = 'transparent';
+  document.getElementById(active).style.borderColor = 'transparent';
+  document.getElementById(complete).style.borderColor = 'transparent';
   document.getElementById(filter).style.borderColor = '#cccccc';
 }
 
@@ -186,7 +189,7 @@ function removeAllTasksFromPage() {
 function toggleTaskId(taskId) {
   var taskNum = extractNumFromTaskId(taskId);
   var taskStatus = extractStatusFromTaskId(taskId);
-  if ('active' === taskStatus) {
+  if (active === taskStatus) {
     return addCompleteToTaskId(taskNum);
   }
   else {
@@ -201,10 +204,10 @@ function toggleTaskInStorage(oldId, newId) {
 
 function toggleTaskDisplayed(oldId, newId) {
   var clickedTask = document.getElementById(oldId);
-  if ('all' === currentFilter) {
+  if (all === currentFilter) {
     clickedTask.setAttribute('id', newId);
     var status = extractStatusFromTaskId(oldId);
-    if ('active' === status) {
+    if (active === status) {
       setCompleteTaskStyle(newId);
     }
     else {
@@ -225,9 +228,9 @@ function extractStatusFromTaskId(idStr) {
 }
 
 function addActiveToTaskId(idStr) {
-  return idStr + ' ' + 'active';
+  return idStr + ' ' + active;
 }
 
 function addCompleteToTaskId(idStr) {
-  return idStr + ' ' + 'complete';
+  return idStr + ' ' + complete;
 }

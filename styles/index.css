@@ -57,6 +57,7 @@ h2 {
 .task-list li {
   position: relative;
   padding: 5px 0 5px 0;
+  overflow-wrap: break-word;
 }
 
 .task-list li:nth-child(2n) {
